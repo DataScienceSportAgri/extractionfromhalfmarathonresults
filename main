@@ -1,0 +1,101 @@
+import random
+
+import requests
+from bs4 import BeautifulSoup
+
+results = []
+names = []
+my_dict = {}
+test = 0
+e=0
+for i in range(199):
+
+    request = requests.get("https://protiming.fr/results/runningR/6765/865/display:iframe/page:"+str(i)+"?url=results%2FrunningR%2F6765%2F865%2Fdisplay%3Aiframe")
+    page = request.content
+    soup = BeautifulSoup(page, 'html.parser')
+    page = soup.find("option", {"selected": "selected"})
+    body = soup.find("tbody")
+    each_one = body.find_all("tr",{"style":"font-family: 'Cuprum','Arial';vertical-align:middle;font-size:11pt;letter"
+                                           "-spacing: 1px;"})
+
+    for member in each_one:
+        sub_members = member.find_all("td")
+        results.append(sub_members[1].text)
+        names.append(sub_members[2].text)
+        e+=1
+print("NB OF RAW RESULTS",len(results))
+print("NB OF RAW NAMES",len(names))
+
+
+def delete_zone(list,increment):
+    for indice_zone in range(increment-5,increment+5):
+        if indice_zone < len(list):
+            for nb in range(9):
+                if names[i][-2:]==" "+str(nb):
+                    del(list[i])
+
+
+get_names=[]
+name = 0
+
+while name < len(names):
+    i=1
+    bad_zone=0
+    good_zone=0
+    for get_name in get_names:
+        if names[name] == get_name or names[name][:-2] == get_name:
+            i+=1
+        if i > 1:
+            names[name] += " " + str(i)
+        if name > 6:
+            if names[name-2][-2:]==names[name-1][-2:]==names[name][-2:]:
+                del(names[name-2:name])
+                del(results[name-2:name])
+                del(get_names[name-2:name-1])
+                bad_zone+=1
+                good_zone=0
+                if bad_zone>3:
+                    delete_zone(names,name)
+                    delete_zone(results,name)
+                    delete_zone(get_names,name-1)
+            else:
+                good_zone+=1
+        if good_zone > 10:
+            bad_zone=0
+    get_names.append(names[name])
+    name+=1
+
+print("NB OF RAFFINED NAMES ",len(names),"NB OF RAFFINED RESULTS ",len(results))
+print("50 first names ", names[:50])
+print("50 first results ", results[:50])
+print("120 to 140 first names ", names[120:140])
+print("120  to 140 first results ", results[120:140])
+print("2000 to 2050 first names ", names[2000:2050])
+print("2000 to 2050 first results ", results[2000:2050])
+print("50 last names ", names[-50:])
+print("50 last results ", results[-50:])
+a=0
+for name in names:
+    a+=1
+    my_dict[name]=results[a]
+    if a >= 4952:
+        break
+
+choices = random.sample(range(4952),10)
+i=0
+for cle, valeur in my_dict.items():
+    i += 1
+    a = 0
+    for choice in choices:
+        a += 1
+        if i == choice:
+            print(cle, valeur)
+            if a < len(choices):
+                del(choices[a])
+            else: break
+
+
+
+
+
+
